@@ -9,9 +9,9 @@ from sklearn.model_selection import train_test_split
 import keras
 from keras.preprocessing.image import ImageDataGenerator
 from keras.models import Model
-from keras.optimizers import Nadam, Adam                  #I changed
-from keras.utils import to_categorical                    #I changed
-from keras.applications.vgg16 import VGG16                #I changed
+from keras.optimizers import Nadam, Adam                  
+from keras.utils import to_categorical                    
+from keras.applications.vgg16 import VGG16                
 from keras.applications.vgg19 import VGG19
 from keras.applications.densenet import DenseNet121
 from keras.layers import Dropout, Flatten, Input, Dense
@@ -28,7 +28,7 @@ from data import TrainTestSplit
 from utils import PrepareData
 
 #===============================================================================
-#Transfer Learning - VGG 16
+# Transfer Learning - VGG 16
 #===============================================================================
 
 X_train_paths, X_test_paths, y_train_string, y_test_string = TrainTestSplit(test_size=0.1).split_train_test()
@@ -50,13 +50,44 @@ out = Dense(13,activation='softmax')(x)
 
 tf_model = Model(inputs=vgg16.input,outputs=out)
 
-# print(tf_model.summary())
-# print(len(tf_model.layers))
-
 for layer in tf_model.layers[:20]:
     layer.trainable=False
+
+#===============================================================================
+# CALLBACKS
+#===============================================================================
+
+history_logger=tf.keras.callbacks.CSVLogger("./history/history.csv", separator=",", append=True)
+
+model_checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
+    filepath='./tmp/checkpoint',
+    save_weights_only=True,
+    monitor='val_loss',
+    mode='min',
+    save_best_only=True)
+
+callbacks = [
+        # tf.keras.callbacks.EarlyStopping(patience=12, monitor='val_loss'),
+        tf.keras.callbacks.TensorBoard(log_dir='logs'),
+        history_logger,
+        model_checkpoint_callback]
+
+#===============================================================================
+# TRAINING
+#===============================================================================
 
 tf_model.compile(optimizer = Adam(0.0001) , loss = 'categorical_crossentropy',
                  metrics=["accuracy"])
 
-history = tf_model.fit(X_train, y_train, batch_size=25, epochs = 40, validation_split=0.2)
+history = tf_model.fit(X_train, y_train, batch_size=25, epochs = 40, validation_split=0.2, callbacks=callbacks)
+
+#===============================================================================
+# SAVE
+#===============================================================================
+
+tf_model.load_weights('./tmp/checkpoint')
+print(tf_model.summary())
+print(history)
+
+tf_model.save("./models/tf_model.h5")
+print('Model Saved!')
