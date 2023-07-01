@@ -26,38 +26,60 @@ import glob
 
 from data import TrainTestSplit
 from utils import PrepareData
+from architecture import VGG16_MODEL
 
 #===============================================================================
-# Transfer Learning - VGG 16
+# SETUP
+#===============================================================================
+
+MODEL = 'tf_model'
+
+#===============================================================================
+# LOAD DATA
 #===============================================================================
 
 X_train_paths, X_test_paths, y_train_string, y_test_string = TrainTestSplit(test_size=0.1).split_train_test()
 X_train = PrepareData().get_images(X_train_paths)
 y_train = PrepareData().encode(y_train_string)
 
-vgg16 = VGG16(
-    include_top=False,
-    weights='imagenet',
-    input_tensor=None,
-    input_shape=(224,224,3)
-)
+model_path = "./models/{}.h5".format(MODEL)
+if os.path.isfile(model_path):
+    model = tf.keras.models.load_model(model_path)
+    print('LOADING MODEL')
+else:
+    model = VGG16_MODEL(freeze=False).model()
+    model.compile(optimizer = Adam(0.0001) , loss = 'categorical_crossentropy', metrics=["accuracy"])
+    print('CREATING NEW MODEL')
 
-x = vgg16.output
-x = Flatten()(x)
-x = Dense(256,activation='relu')(x)
-x = Dropout(0.2)(x)
-out = Dense(13,activation='softmax')(x)
+#===============================================================================
+# Transfer Learning - VGG 16
+#===============================================================================
 
-tf_model = Model(inputs=vgg16.input,outputs=out)
+# vgg16 = VGG16(
+#     include_top=False,
+#     weights='imagenet',
+#     input_tensor=None,
+#     input_shape=(224,224,3)
+# )
 
-for layer in tf_model.layers[:20]:
-    layer.trainable=False
+# x = vgg16.output
+# x = Flatten()(x)
+# x = Dense(64,activation='relu')(x)
+# x = Dropout(0.4)(x)
+# out = Dense(13,activation='softmax')(x)
+
+# tf_model = Model(inputs=vgg16.input,outputs=out)
+
+# for layer in tf_model.layers[:20]:
+#     layer.trainable=False
+
+# tf_model = VGG16_MODEL(freeze=False).model()
 
 #===============================================================================
 # CALLBACKS
 #===============================================================================
 
-history_logger=tf.keras.callbacks.CSVLogger("./history/history.csv", separator=",", append=True)
+history_logger=tf.keras.callbacks.CSVLogger("./history/{}.csv".format(MODEL), separator=",", append=True)
 
 model_checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
     filepath='./tmp/checkpoint',
@@ -76,18 +98,18 @@ callbacks = [
 # TRAINING
 #===============================================================================
 
-tf_model.compile(optimizer = Adam(0.0001) , loss = 'categorical_crossentropy',
-                 metrics=["accuracy"])
+# tf_model.compile(optimizer = Adam(0.0001) , loss = 'categorical_crossentropy',
+#                  metrics=["accuracy"])
 
-history = tf_model.fit(X_train, y_train, batch_size=25, epochs = 40, validation_split=0.2, callbacks=callbacks)
+history = model.fit(X_train, y_train, batch_size=25, epochs = 10, validation_split=0.2, callbacks=callbacks)
 
 #===============================================================================
 # SAVE
 #===============================================================================
 
-tf_model.load_weights('./tmp/checkpoint')
-print(tf_model.summary())
+model.load_weights('./tmp/checkpoint')
+# print(model.summary())
 print(history)
 
-tf_model.save("./models/tf_model.h5")
+model.save("./models/{}.h5".format(MODEL))
 print('Model Saved!')
