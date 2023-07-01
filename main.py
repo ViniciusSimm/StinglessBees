@@ -59,4 +59,4 @@ for layer in tf_model.layers[:20]:
 tf_model.compile(optimizer = Adam(0.0001) , loss = 'categorical_crossentropy',
                  metrics=["accuracy"])
 
-history = tf_model.fit(X_train, y_train, epochs = 40)
+history = tf_model.fit(X_train, y_train, batch_size=25, epochs = 40, validation_split=0.2)
