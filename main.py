@@ -32,7 +32,7 @@ from architecture import VGG16_MODEL
 # SETUP
 #===============================================================================
 
-MODEL = 'tf_model'
+MODEL = 'tf_model_v2'
 
 #===============================================================================
 # LOAD DATA
@@ -101,7 +101,7 @@ callbacks = [
 # tf_model.compile(optimizer = Adam(0.0001) , loss = 'categorical_crossentropy',
 #                  metrics=["accuracy"])
 
-history = model.fit(X_train, y_train, batch_size=25, epochs = 10, validation_split=0.2, callbacks=callbacks)
+history = model.fit(X_train, y_train, batch_size=25, epochs = 15, validation_split=0.2, callbacks=callbacks)
 
 #===============================================================================
 # SAVE
@@ -109,7 +109,7 @@ history = model.fit(X_train, y_train, batch_size=25, epochs = 10, validation_spl
 
 model.load_weights('./tmp/checkpoint')
 # print(model.summary())
-print(history)
+
 
 model.save("./models/{}.h5".format(MODEL))
 print('Model Saved!')

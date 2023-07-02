@@ -7,12 +7,33 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 class PrepareData():
+    def __init__(self):
+        self.convert = {'irai':[1,0,0,0,0,0,0,0,0,0,0,0,0],
+                    'mirim_droryana':[0,1,0,0,0,0,0,0,0,0,0,0,0],
+                    'mirim_preguica':[0,0,1,0,0,0,0,0,0,0,0,0,0],
+                    'jatai':[0,0,0,1,0,0,0,0,0,0,0,0,0],
+                    'bugia':[0,0,0,0,1,0,0,0,0,0,0,0,0],
+                    'japura':[0,0,0,0,0,1,0,0,0,0,0,0,0],
+                    'mandaguari':[0,0,0,0,0,0,1,0,0,0,0,0,0],
+                    'moca_branca':[0,0,0,0,0,0,0,1,0,0,0,0,0],
+                    'bora':[0,0,0,0,0,0,0,0,1,0,0,0,0],
+                    'tubuna':[0,0,0,0,0,0,0,0,0,1,0,0,0],
+                    'boca_de_sapo':[0,0,0,0,0,0,0,0,0,0,1,0,0],
+                    'lambe_olhos':[0,0,0,0,0,0,0,0,0,0,0,1,0],
+                    'mandacaia':[0,0,0,0,0,0,0,0,0,0,0,0,1]}
+
     def get_img(self,path):
         img = cv2.imread(path)
         img = cv2.resize(img,(224,224))
         img = img.astype('float32')
         return img
     
+    def convert_softmax_to_one_hot(self,softmax_array):
+        max_position = np.argmax(softmax_array)
+        one_hot_array = np.zeros_like(softmax_array)
+        one_hot_array[max_position] = 1
+        return one_hot_array
+
     def get_images(self,list_of_paths):
         all_images = []
         for path in list_of_paths:
@@ -31,21 +52,18 @@ class PrepareData():
     #     return np.array(labels_categorical)
 
     def encode(self,input):
-        convert = {'irai':[1,0,0,0,0,0,0,0,0,0,0,0,0],
-                   'mirim_droryana':[0,1,0,0,0,0,0,0,0,0,0,0,0],
-                   'mirim_preguica':[0,0,1,0,0,0,0,0,0,0,0,0,0],
-                   'jatai':[0,0,0,1,0,0,0,0,0,0,0,0,0],
-                   'bugia':[0,0,0,0,1,0,0,0,0,0,0,0,0],
-                   'japura':[0,0,0,0,0,1,0,0,0,0,0,0,0],
-                   'mandaguari':[0,0,0,0,0,0,1,0,0,0,0,0,0],
-                   'moca_branca':[0,0,0,0,0,0,0,1,0,0,0,0,0],
-                   'bora':[0,0,0,0,0,0,0,0,1,0,0,0,0],
-                   'tubuna':[0,0,0,0,0,0,0,0,0,1,0,0,0],
-                   'boca_de_sapo':[0,0,0,0,0,0,0,0,0,0,1,0,0],
-                   'lambe_olhos':[0,0,0,0,0,0,0,0,0,0,0,1,0],
-                   'mandacaia':[0,0,0,0,0,0,0,0,0,0,0,0,1]}
-        output = np.array([convert[i] for i in input])
+        output = np.array([self.convert[i] for i in input])
         return output
+    
+    # def decode(self,input):
+    #     vec = [list(PrepareData().convert_softmax_to_one_hot(i).astype(int)) for i in input]
+    #     return [self.convert.keys()[self.convert.values().index(i)] for i in vec]
+
+    def decode(self,input):
+        reverse_convert = {tuple(value): key for key, value in self.convert.items()}
+        name = reverse_convert.get(tuple(input))
+        return name
+
 
 class GetHistory():
     def __init__(self, df):
@@ -88,7 +106,10 @@ class GetHistory():
 
 
 if __name__ == '__main__':
-    history_table = pd.read_csv('history/history.csv')
-    history_class = GetHistory(history_table)
-    acc = history_class.accuracy_vs_val_accuracy()
-    loss = history_class.loss_vs_val_loss()
+    # history_table = pd.read_csv('history/tf_model_v2.csv')
+    # history_class = GetHistory(history_table)
+    # acc = history_class.accuracy_vs_val_accuracy()
+    # loss = history_class.loss_vs_val_loss()
+    # data = np.array([0,0.1,0.0111,0.9])
+    # print(PrepareData().convert_softmax_to_one_hot(data))
+    print(PrepareData().decode([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]))
