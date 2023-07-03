@@ -106,10 +106,10 @@ class GetHistory():
 
 
 if __name__ == '__main__':
-    # history_table = pd.read_csv('history/tf_model_v2.csv')
-    # history_class = GetHistory(history_table)
-    # acc = history_class.accuracy_vs_val_accuracy()
-    # loss = history_class.loss_vs_val_loss()
+    history_table = pd.read_csv('history/densenet_v1.csv')
+    history_class = GetHistory(history_table)
+    acc = history_class.accuracy_vs_val_accuracy()
+    loss = history_class.loss_vs_val_loss()
     # data = np.array([0,0.1,0.0111,0.9])
     # print(PrepareData().convert_softmax_to_one_hot(data))
-    print(PrepareData().decode([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]))
+    # print(PrepareData().decode([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]))

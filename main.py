@@ -26,13 +26,18 @@ import glob
 
 from data import TrainTestSplit
 from utils import PrepareData
-from architecture import VGG16_MODEL
+from architecture import VGG16_MODEL,VGG19_MODEL,DENSENET121_MODEL
+
+import tensorflow as tf
+# physical_devices = tf.config.experimental.list_physical_devices('GPU')
+# if len(physical_devices) > 0:
+#     tf.config.experimental.set_memory_growth(physical_devices[0], True)
 
 #===============================================================================
 # SETUP
 #===============================================================================
 
-MODEL = 'tf_model_v2'
+MODEL = 'densenet_v1'
 
 #===============================================================================
 # LOAD DATA
@@ -47,33 +52,9 @@ if os.path.isfile(model_path):
     model = tf.keras.models.load_model(model_path)
     print('LOADING MODEL')
 else:
-    model = VGG16_MODEL(freeze=False).model()
+    model = DENSENET121_MODEL(freeze=True).model()
     model.compile(optimizer = Adam(0.0001) , loss = 'categorical_crossentropy', metrics=["accuracy"])
     print('CREATING NEW MODEL')
-
-#===============================================================================
-# Transfer Learning - VGG 16
-#===============================================================================
-
-# vgg16 = VGG16(
-#     include_top=False,
-#     weights='imagenet',
-#     input_tensor=None,
-#     input_shape=(224,224,3)
-# )
-
-# x = vgg16.output
-# x = Flatten()(x)
-# x = Dense(64,activation='relu')(x)
-# x = Dropout(0.4)(x)
-# out = Dense(13,activation='softmax')(x)
-
-# tf_model = Model(inputs=vgg16.input,outputs=out)
-
-# for layer in tf_model.layers[:20]:
-#     layer.trainable=False
-
-# tf_model = VGG16_MODEL(freeze=False).model()
 
 #===============================================================================
 # CALLBACKS
@@ -98,10 +79,7 @@ callbacks = [
 # TRAINING
 #===============================================================================
 
-# tf_model.compile(optimizer = Adam(0.0001) , loss = 'categorical_crossentropy',
-#                  metrics=["accuracy"])
-
-history = model.fit(X_train, y_train, batch_size=25, epochs = 15, validation_split=0.2, callbacks=callbacks)
+history = model.fit(X_train, y_train, batch_size=10, epochs = 15, validation_split=0.2, callbacks=callbacks)
 
 #===============================================================================
 # SAVE
