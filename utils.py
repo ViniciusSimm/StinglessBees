@@ -5,6 +5,7 @@ from sklearn.preprocessing import LabelEncoder, MultiLabelBinarizer
 from keras.utils import to_categorical
 import matplotlib.pyplot as plt
 import pandas as pd
+from iterstrat.ml_stratifiers import MultilabelStratifiedKFold
 
 class PrepareData():
     def __init__(self):
@@ -64,6 +65,17 @@ class PrepareData():
         name = reverse_convert.get(tuple(input))
         return name
 
+    def fold_cross(self, X, y):
+        skf = MultilabelStratifiedKFold(n_splits=5, shuffle=True, random_state=1)
+        skf.get_n_splits(X, y)
+
+        train_folds_index = []
+        test_folds_index = []
+
+        for i, (train_index, test_index) in enumerate(skf.split(X, y)):
+            train_folds_index.append(train_index)
+            test_folds_index.append(test_index)
+        return np.array(train_folds_index), np.array(test_folds_index)
 
 class GetHistory():
     def __init__(self, df):

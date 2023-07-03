@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.model_selection import train_test_split
 
+from iterstrat.ml_stratifiers import MultilabelStratifiedKFold
 import keras
 from keras.preprocessing.image import ImageDataGenerator
 from keras.models import Model
@@ -37,7 +38,7 @@ import tensorflow as tf
 # SETUP
 #===============================================================================
 
-MODEL = 'densenet_v1'
+MODEL = 'VGG16_MODEL_v1'
 
 #===============================================================================
 # LOAD DATA
@@ -52,9 +53,11 @@ if os.path.isfile(model_path):
     model = tf.keras.models.load_model(model_path)
     print('LOADING MODEL')
 else:
-    model = DENSENET121_MODEL(freeze=True).model()
+    model = VGG16_MODEL(freeze=False).model()
     model.compile(optimizer = Adam(0.0001) , loss = 'categorical_crossentropy', metrics=["accuracy"])
     print('CREATING NEW MODEL')
+
+train_folds_index, test_folds_index = PrepareData().fold_cross(X_train, y_train)
 
 #===============================================================================
 # CALLBACKS
@@ -79,7 +82,7 @@ callbacks = [
 # TRAINING
 #===============================================================================
 
-history = model.fit(X_train, y_train, batch_size=10, epochs = 15, validation_split=0.2, callbacks=callbacks)
+history = model.fit(X_train[train_folds_index[0]], y_train[train_folds_index[0]], batch_size=10, epochs = 15, validation_split=0.2, callbacks=callbacks)
 
 #===============================================================================
 # SAVE
