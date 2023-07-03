@@ -41,3 +41,4 @@ if __name__ == '__main__':
     # print(le.transform(y_train))
     print(np.array([[0,0,1],[0,0,0]]))
     print(set(y))
+    

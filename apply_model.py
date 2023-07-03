@@ -11,33 +11,37 @@ import matplotlib.pyplot as plt
 # SETUP
 #===============================================================================
 
-MODEL = 'densenet_v1'
+MODEL = 'VGG16_unfreeze_0'
 
 #===============================================================================
 # LOAD DATA
 #===============================================================================
 
-X_train_paths, X_test_paths, y_train_string, y_test_string = TrainTestSplit(test_size=0.1).split_train_test()
-X_test = PrepareData().get_images(X_test_paths)
-y_test = PrepareData().encode(y_test_string)
+X_train_paths, X_test_paths, y_train_string, y_test_string = TrainTestSplit(test_size=0.000001).split_train_test()
+X_train = PrepareData().get_images(X_train_paths)
+y_train = PrepareData().encode(y_train_string)
+
+train_folds_index, test_folds_index = PrepareData().fold_cross(X_train, y_train)
 
 classes = PrepareData().convert
 
 model_path = "./models/{}.h5".format(MODEL)
 model = tf.keras.models.load_model(model_path)
 
-loss,acc = model.evaluate(X_test,y_test)
+loss,acc = model.evaluate(X_train[test_folds_index[0]],y_train[test_folds_index[0]])
 
 print(loss,acc)
 
-y_pred = model.predict(X_test)
+y_pred = model.predict(X_train[test_folds_index[0]])
 # print(y_pred)
 y_pred_bin = [list(PrepareData().convert_softmax_to_one_hot(i).astype(int)) for i in y_pred]
 # print(y_pred_bin)
 y_pred_string = [PrepareData().decode(i) for i in y_pred_bin]
 print(y_pred_string)
 
-cm = sklearn.metrics.confusion_matrix(y_test_string,y_pred_string)
+answers = [PrepareData().decode(i) for i in y_train[test_folds_index[0]]]
+
+cm = sklearn.metrics.confusion_matrix(answers,y_pred_string)
 disp = sklearn.metrics.ConfusionMatrixDisplay(cm)
 
 disp.plot()

@@ -38,26 +38,29 @@ import tensorflow as tf
 # SETUP
 #===============================================================================
 
-MODEL = 'VGG16_MODEL_v1'
+MODEL = 'DENSENET121_freeze_4'
 
 #===============================================================================
 # LOAD DATA
 #===============================================================================
 
-X_train_paths, X_test_paths, y_train_string, y_test_string = TrainTestSplit(test_size=0.1).split_train_test()
+X_train_paths, X_test_paths, y_train_string, y_test_string = TrainTestSplit(test_size=0.000001).split_train_test()
 X_train = PrepareData().get_images(X_train_paths)
 y_train = PrepareData().encode(y_train_string)
+
+train_folds_index, test_folds_index = PrepareData().fold_cross(X_train, y_train)
+
+print('ORIGINAL SIZE:',len(y_train))
+print('FOLD SIZE:',len(y_train[train_folds_index[1]]))
 
 model_path = "./models/{}.h5".format(MODEL)
 if os.path.isfile(model_path):
     model = tf.keras.models.load_model(model_path)
     print('LOADING MODEL')
 else:
-    model = VGG16_MODEL(freeze=False).model()
+    model = DENSENET121_MODEL(freeze=True).model()
     model.compile(optimizer = Adam(0.0001) , loss = 'categorical_crossentropy', metrics=["accuracy"])
     print('CREATING NEW MODEL')
-
-train_folds_index, test_folds_index = PrepareData().fold_cross(X_train, y_train)
 
 #===============================================================================
 # CALLBACKS
@@ -82,7 +85,7 @@ callbacks = [
 # TRAINING
 #===============================================================================
 
-history = model.fit(X_train[train_folds_index[0]], y_train[train_folds_index[0]], batch_size=10, epochs = 15, validation_split=0.2, callbacks=callbacks)
+history = model.fit(X_train[train_folds_index[4]], y_train[train_folds_index[4]], batch_size=20, epochs = 30, validation_split=0.2, callbacks=callbacks)
 
 #===============================================================================
 # SAVE
