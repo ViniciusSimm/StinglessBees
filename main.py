@@ -51,7 +51,7 @@ y_train = PrepareData().encode(y_train_string)
 train_folds_index, test_folds_index = PrepareData().fold_cross(X_train, y_train)
 
 print('ORIGINAL SIZE:',len(y_train))
-print('FOLD SIZE:',len(y_train[train_folds_index[1]]))
+print('FOLD SIZE:',len(y_train[train_folds_index[4]]))
 
 model_path = "./models/{}.h5".format(MODEL)
 if os.path.isfile(model_path):
@@ -85,7 +85,7 @@ callbacks = [
 # TRAINING
 #===============================================================================
 
-history = model.fit(X_train[train_folds_index[4]], y_train[train_folds_index[4]], batch_size=20, epochs = 30, validation_split=0.2, callbacks=callbacks)
+history = model.fit(X_train[train_folds_index[4]], y_train[train_folds_index[4]], batch_size=20, epochs = 20, validation_split=0.2, callbacks=callbacks)
 
 #===============================================================================
 # SAVE

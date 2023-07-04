@@ -118,7 +118,7 @@ class GetHistory():
 
 
 if __name__ == '__main__':
-    history_table = pd.read_csv('history/densenet_v1.csv')
+    history_table = pd.read_csv('history/DENSENET121_freeze_0.csv')
     history_class = GetHistory(history_table)
     acc = history_class.accuracy_vs_val_accuracy()
     loss = history_class.loss_vs_val_loss()
