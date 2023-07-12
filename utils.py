@@ -77,6 +77,15 @@ class PrepareData():
             test_folds_index.append(test_index)
         return np.array(train_folds_index), np.array(test_folds_index)
 
+    def obter_strings_unicas(self,lista):
+        conjunto = set()
+        resultado = []
+        for item in lista:
+            if item not in conjunto:
+                conjunto.add(item)
+                resultado.append(item)
+        return resultado
+
 class GetHistory():
     def __init__(self, df):
         self.df = df
@@ -103,10 +112,10 @@ class GetHistory():
         ax = fig.add_subplot(111)
         ax.plot(self.df.index, self.df['loss'], label='Train')
         ax.plot(self.df.index, self.df['val_loss'], label='Validation')
-        ax.set_title('Train and Validation Loss',
-                     fontdict={'fontsize': 14, 'fontweight': 'bold'})
-        ax.set_xlabel('Epochs', fontdict={'fontsize': 12})
-        ax.set_ylabel('Loss', fontdict={'fontsize': 12})
+        # ax.set_title('Train and Validation Loss',
+        #              fontdict={'fontsize': 14, 'fontweight': 'bold'})
+        ax.set_xlabel('Epochs')
+        ax.set_ylabel('Loss')
         colors = ['#1a3cad', '#ff0e26']
         for i, line in enumerate(ax.get_lines()):
             line.set_color(colors[i])
@@ -125,3 +134,4 @@ if __name__ == '__main__':
     # data = np.array([0,0.1,0.0111,0.9])
     # print(PrepareData().convert_softmax_to_one_hot(data))
     # print(PrepareData().decode([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]))
+    
